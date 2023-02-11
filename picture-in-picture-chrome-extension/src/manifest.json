@@ -1,0 +1,20 @@
+{
+  "name": "Picture-in-Picture Extension",
+  "description": "Watch video using Picture-in-Picture",
+  "version": "1.10",
+  "icons": {
+    "128": "assets/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "19": "assets/icon19.png",
+      "38": "assets/icon38.png"
+    }
+  },
+  "permissions": ["activeTab", "scripting"],
+  "minimum_chrome_version": "69.0.3483.0",
+  "manifest_version": 3
+}
