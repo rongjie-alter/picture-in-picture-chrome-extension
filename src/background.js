@@ -12,15 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-chrome.action.onClicked.addListener((tab) => {
-  chrome.storage.sync.get({ optOutAnalytics: false }, (results) => {
-    const files = results.optOutAnalytics
-      ? ["script.js"]
-      : ["script.js", "ga.js"];
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
-      world: "MAIN",
-      files,
-    });
+chrome.action.onClicked.addListener(tab => {
+  chrome.scripting.executeScript({
+    files: ['script.js'],
+    target: {tabId: tab.id, allFrames: true}
   });
 });

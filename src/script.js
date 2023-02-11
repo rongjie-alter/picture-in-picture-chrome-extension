@@ -12,21 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+function isElementInViewport(rect) {
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
+    );
+}
+
 function findLargestPlayingVideo() {
-  const videos = Array.from(document.querySelectorAll('video'))
-    .filter(video => video.readyState != 0)
+  let videos = Array.from(document.querySelectorAll('video'));
+  if (videos.length == 1) return videos[0];
+
+  videos = videos.filter(video => video.readyState != 0)
     .filter(video => video.disablePictureInPicture == false)
+    .map(video => { return {rect: video.getBoundingClientRect(), video: video}; })
+    .filter(item => isElementInViewport(item.rect))
     .sort((v1, v2) => {
-      const v1Rect = v1.getClientRects()[0]||{width:0,height:0};
-      const v2Rect = v2.getClientRects()[0]||{width:0,height:0};
-      return ((v2Rect.width * v2Rect.height) - (v1Rect.width * v1Rect.height));
+      return ((v2.rect.width * v2.rect.height) - (v1.rect.width * v1.rect.height));
     });
 
   if (videos.length === 0) {
     return;
   }
 
-  return videos[0];
+  return videos[0].video;
 }
 
 async function requestPictureInPicture(video) {
@@ -51,7 +62,19 @@ function maybeUpdatePictureInPictureVideo(entries, observer) {
   }
 }
 
-(async () => {
+
+
+(async function() {
+  const whitelist = [
+    "https://www.disneyplus.com",
+    "https://www.netflix.com",
+  ];
+
+  if (whitelist.some(url => window.location.href.startsWith(url))) {
+    Array.from(document.querySelectorAll('video'))
+      .forEach(video => video.removeAttribute("disablePictureInPicture"));
+  }
+
   const video = findLargestPlayingVideo();
   if (!video) {
     return;
@@ -61,9 +84,4 @@ function maybeUpdatePictureInPictureVideo(entries, observer) {
     return;
   }
   await requestPictureInPicture(video);
-  _gaq.push(['_trackPageview', '/']);
 })();
-
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-134864766-1']);
-_gaq.push(['_setDetectTitle', false]);
